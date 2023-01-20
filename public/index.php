@@ -4,6 +4,7 @@ require __DIR__."/../bootstrap.php";
 use Src\Controllers\MeasuringController;
 use Src\Controllers\AlarmController;
 use Src\Controllers\DeviceController;
+use Src\Controllers\MeasurmentConfigController;
 use Firebase\JWT\JWT;
 use Firebase\JWT\JWK;
 
@@ -16,9 +17,8 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode('/', $uri);
-//$requestMethod = $_SERVER["REQUEST_METHOD"];
-//$uriParts = explode('/', $uri);
 
+// Switch to handle all http requests, and gets you to the right endpoint
 switch ($uri[1])
 {
     case 'alarm':
@@ -88,126 +88,45 @@ switch ($uri[1])
         $deviceController = new DeviceController($dbConnection, $requestMethod, $device_id, $location_id);
         $deviceController->processRequest();
         break;
+    case 'measurementconfig':
+        $measurementconfig_id = null;
+        $measuringUnit_id = null;
+        $device_id = null;
+
+        if ($uri[3] === 'config')
+        {
+            $measurementconfig_id = $uri[2];
+        } elseif ($uri[3] === 'type')
+        {
+            $measuringUnit_id = $uri[2];
+        } elseif ($uri[3] === 'device')
+        {
+            $device_id = $uri[2];
+        }
+
+        if (! authenticate())
+        {
+            header('HTTP/1.1 401 Unauthorized');
+            exit('Unauthorized');
+        }
+        $requestMethod = $_SERVER['REQUEST_METHOD'];
+
+        $measurementconfigController = new MeasurmentConfigController($dbConnection, $requestMethod, $measurementconfig_id, $measuringUnit_id, $device_id);
+        $measurementconfigController->processRequest();
+        break;
     default:
         header("HTTP/1.1 404 Not Found");
         exit();
 }
 
-/*function authenticate()
-{
-    try {
-        switch (true)
-        {
-            case array_key_exists('HTTP_AUTHORIZATION', $_SERVER):
-                $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
-                break;
-            case array_key_exists('Authorization', $_SERVER):
-                $authHeader = $_SERVER['Authorization'];
-                break;
-            default:
-                $authHeader = null;
-                break;
-        }
-        preg_match('/Bearer\s(\S+)/', $authHeader, $matches);
-        if (!isset($matches[1]))
-        {
-            throw  new \Exception('No Bearer Token');
-        }
-        $jwtVerifier = (new \Okta\JwtVerifier\JwtVerifierBuilder())
-            ->setIssuer(getenv('OKTA_ISSUER'))
-            ->setAudience(getenv('OKTA_AUDIENCE'))
-            ->setClientId(getenv('OKTA_CLIENT_ID'))
-            ->build();
-        return $jwtVerifier->verify($matches[1]);
-    } catch (\Exception $e) {
-        return false;
-    }
-}*/
-// define all valid endpoints - this will act as a simple router
-/*$routes = [
-    'alarms' => [
-        'method' => 'GET',
-        'expression' => '/^\/alarms\/?$/',
-        'controller_method' => 'index'
-    ],
-    'alarms.show.id' => [
-        'method' => 'GET',
-        'expression' => '/^\/alarms\/(\d+)\/?$/',
-        'controller_method' => 'showID'
-    ],
-    'alarms.show.measuringID' => [
-        'method' => 'GET',
-        'expression' => '/^\/alarms\/(\d+)\/?$/',
-        'controller_method' => 'showMeasurementID'
-    ],
-    'alarms.create' => [
-        'method' => 'POST',
-        'expression' => '/^\/alarms\/?$/',
-        'controller_method' => 'store'
-    ],
-    'alarms.update' => [
-        'method' => 'POST',
-        'expression' => '/^\/alarms\/(\d+)\/update\/?$/',
-        'controller_method' => 'update'
-    ],
-    'alarms.destroy' => [
-        'method' => 'POST',
-        'expression' => '/^\/alarms\/(\d+)\/destroy\/?$/',
-        'controller_method' => 'destroy'
-    ],
-    'customers' => [
-        'method' => 'GET',
-        'expression' => '/^\/customers\/?$/',
-        'controller_method' => 'index'
-    ],
-    'customers.create' => [
-        'method' => 'POST',
-        'expression' => '/^\/customers\/?$/',
-        'controller_method' => 'store'
-    ],
-    'customers.charge' => [
-        'method' => 'POST',
-        'expression' => '/^\/customers\/(\d+)\/charges\/?$/',
-        'controller_method' => 'charge'
-    ]
-];
-*/
 
-/*
-$routeFound = null;
-foreach ($routes as $route)
-{
-    if (
-        $route['method'] == $requestMethod &&
-        preg_match($route['expression'], $uri)
-    )
-    {
-        $routeFound = $route;
-        break;
-    }
-}
-
-if (! $routeFound)
-{
-    header("HTTP/1.1 404 Not Found");
-    exit();
-}
-
-$methodName = $route['controller_method'];
-
-// authenticate the request:
-if (! authenticate($methodName))
-{
-    header("HTTP/1.1 401 Unauthorized");
-    exit('Unauthorized');
-}
-
-$controller = new CustomerController();
-$controller->$methodName($uriParts);
-
-*/
 // END OF FRONT CONTROLLER
 // OAuth authentication functions follow
+/**
+ * Checks to see if you are Authorized and are allowed to enter the API Calls
+ *
+ * @return bool
+ */
 function authenticate()
 {
     // extract the token from the headers
@@ -227,13 +146,15 @@ function authenticate()
     $token = $matches[1];
     $tokenParts = explode('.', $token);
 
-    /*if ($methodName == 'charge')
+    /*
+    if ($methodName == 'charge')
     {
         return authenticateRemotely($token);
     } else
     {
 
-    }*/
+    }
+    */
     return authenticateLocally($token, $tokenParts);
 
 }
@@ -260,6 +181,11 @@ function authenticateRemotely($token)
     return true;
 }
 
+/**
+ * @param  string $token Is the part of the authentication, that is being checked to see if your access key used is valid.
+ * @param array $tokenParts Is a array of the token, used to check each individual thing for matches.
+ * @return bool If returning false, you are Unauthorized. If returning true, you're allowed access.
+ */
 function authenticateLocally($token, $tokenParts)
 {
     //echo json_decode(base64UrlDecode($tokenParts[0])) . "\n";
@@ -343,6 +269,12 @@ function authenticateLocally($token, $tokenParts)
     return true;
 }
 
+/**
+ * makes the curl request, used for checking the Authentication.
+ * @param $url
+ * @param $params
+ * @return mixed
+ */
 function http($url, $params = null)
 {
     $ch = curl_init($url);
@@ -355,6 +287,11 @@ function http($url, $params = null)
     return json_decode(curl_exec($ch), true);
 }
 
+/**
+ *  used to make the tokenparts into a string
+ * @param $input
+ * @return false|string
+ */
 function base64UrlDecode($input)
 {
     $remainder = strlen($input) % 4;

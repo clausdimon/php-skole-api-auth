@@ -141,7 +141,6 @@
         private function validateAlarm(array $input)
         {
             if (
-                ! isset($input['date_time']) &&
                 ! isset($input['isOn']) &&
                 ! isset($input['device_id']) &&
                 ! isset($input['value']) &&

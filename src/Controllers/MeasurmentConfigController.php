@@ -7,19 +7,19 @@
     {
         private $db;
         private $requestMethod;
-        private $measurmentConfig_id;
+        private $measurementconfig_id;
         private $measuringUnit_id;
         private $device_id;
-        private $measurmentConfigGateway;
+        private $measurementconfigGateway;
 
-        public function __construct($db, $requestMethod, $measurmentConfig_id, $measuringUnit_id, $device_id)
+        public function __construct($db, $requestMethod, $measurementconfig_id, $measuringUnit_id, $device_id)
         {
             $this->db = $db;
             $this->requestMethod = $requestMethod;
-            $this->measurmentConfig_id = $measurmentConfig_id;
+            $this->measurementconfig_id = $measurementconfig_id;
             $this->measuringUnit_id = $measuringUnit_id;
             $this->device_id = $device_id;
-            $this->measurmentConfigGateway = new MeasurementConfigGateway($db);
+            $this->measurementconfigGateway = new MeasurementConfigGateway($db);
         }
 
         public function processRequest()
@@ -27,9 +27,9 @@
             switch ($this->requestMethod)
             {
                 case 'GET':
-                    if ($this->measurmentConfig_id)
+                    if ($this->measurementconfig_id)
                     {
-                        $response = $this->getConfigWithId($this->measurmentConfig_id);
+                        $response = $this->getConfigWithId($this->measurementconfig_id);
                     } elseif ($this->measuringUnit_id)
                     {
                         $response = $this->getConfigForType($this->measuringUnit_id);
@@ -45,10 +45,10 @@
                     $response = $this->createConfigFromRequest();
                     break;
                 case 'PUT':
-                    $response = $this->updateConfigFromRequest($this->measurmentConfig_id);
+                    $response = $this->updateConfigFromRequest($this->measurementconfig_id);
                     break;
                 case 'DELETE':
-                    $response = $this->deleteConfig($this->measurmentConfig_id);
+                    $response = $this->deleteConfig($this->measurementconfig_id);
                     break;
                 default:
                     $response = $this->notFoundResponse();
@@ -63,7 +63,7 @@
 
         private function getAllConfig()
         {
-            $result = $this->measurmentConfigGateway->findAll();
+            $result = $this->measurementconfigGateway->findAll();
             if (! $result)
             {
                 return $this->notFoundResponse();
@@ -75,7 +75,7 @@
 
         private function getConfigWithId($id)
         {
-            $result = $this->measurmentConfigGateway->find_measurmentConfig($id);
+            $result = $this->measurementconfigGateway->find_measurementconfig($id);
             if (! $result)
             {
                 return $this->notFoundResponse();
@@ -87,7 +87,7 @@
 
         private function getConfigForType($id)
         {
-            $result = $this->measurmentConfigGateway->find_measuringType($id);
+            $result = $this->measurementconfigGateway->find_measuringType($id);
             if (! $result)
             {
                 return $this->notFoundResponse();
@@ -99,7 +99,7 @@
 
         private function getDeviceConfig($id)
         {
-            $result = $this->measurmentConfigGateway->find_device($id);
+            $result = $this->measurementconfigGateway->find_device($id);
             if (! $result)
             {
                 return $this->notFoundResponse();
@@ -116,7 +116,7 @@
             {
                 return $this->unprocessableEntityResponse();
             }
-            $this->measurmentConfigGateway->insert($input);
+            $this->measurementconfigGateway->insert($input);
             $response['status_code_header'] = 'HTTP/1.1 201 Created';
             $response['body'] = null;
             return $response;
@@ -124,7 +124,7 @@
 
         private function updateConfigFromRequest($id)
         {
-            $result = $this->measurmentConfigGateway->find_measurmentConfig($id);
+            $result = $this->measurementconfigGateway->find_measurementconfig($id);
             if (! $result)
             {
                 return $this->notFoundResponse();
@@ -134,7 +134,7 @@
             {
                 return $this->unprocessableEntityResponse();
             }
-            $this->measurmentConfigGateway->update($id, $input);
+            $this->measurementconfigGateway->update($id, $input);
             $response['status_code_header'] = 'HTTP/1.1 200 OK';
             $response['body'] = null;
             return $response;
@@ -142,12 +142,12 @@
 
         private function deleteConfig($id)
         {
-            $result = $this->measurmentConfigGateway->find_measurmentConfig($id);
+            $result = $this->measurementconfigGateway->find_measurementconfig($id);
             if (! $result)
             {
                 return $this->notFoundResponse();
             }
-            $this->measurmentConfigGateway->delete($id);
+            $this->measurementconfigGateway->delete($id);
             $response['status_code_header'] = 'HTTP/1.1 200 OK';
             $response['body'] = null;
             return $response;

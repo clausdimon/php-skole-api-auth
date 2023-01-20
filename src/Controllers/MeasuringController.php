@@ -145,7 +145,6 @@
             if (
                 ! isset($input['value']) &&
                 ! isset($input['measuringUnit_id']) &&
-                ! isset($input['timestamp']) &&
                 ! isset($input['device_id'])
             )
             {

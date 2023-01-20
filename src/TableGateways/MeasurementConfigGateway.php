@@ -13,22 +13,27 @@
         public function findAll()
         {
             $sql = "SELECT "
-                . "measurmentConfig.name AS \"measurmentConfig_name\", "
-                . "measurmentConfig.min, "
-                . "measurmentConfig.max, "
-                . "measurmentConfig.measuring_frequency_normal, "
-                . "measurmentConfig.measuring_frequency_warning, "
-                . "measurmentConfig.start_time, "
-                . "measurmentConfig.end_time, "
-                . "measurmentConfig.enabled, "
-                . "measurmentConfig.measuringUnit_id, "
+                . "measurementconfig.name AS \"measurementconfig_name\", "
+                . "measurementconfig.min, "
+                . "measurementconfig.max, "
+                . "measurementconfig.measuring_frequency_normal, "
+                . "measurementconfig.measuring_frequency_warning, "
+                . "measurementconfig.start_time, "
+                . "measurementconfig.end_time, "
+                . "measurementconfig.enabled, "
+                . "measurementconfig.measuringUnit_id, "
                 . "measuringUnit.name AS \"measuringUnit_name\", "
-                . "measurmentConfig.device_id, "
+                . "measurementconfig.device_id, "
                 . "device.name AS \"device_name\", "
-                . "device.mac AS \"device_mac\" "
-                . "FROM (( measurmentConfig "
-                . "INNER JOIN measuringUnit ON measurmentConfig.measuringUnit_id = measuringUnit.id) "
-                . "INNER JOIN device ON measurmentConfig.device_id = device.id)";
+                . "device.mac AS \"device_mac\", "
+                . "location.name AS \"location_name\", "
+                . "greenhouse.name AS \"greenhouse_name\", "
+                . "greenhouse.address AS \"greenhouse_address\" "
+                . "FROM (((( measurementconfig "
+                . "INNER JOIN measuringUnit ON measurementconfig.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN device ON measurementconfig.device_id = device.id) "
+                . "INNER JOIN location ON device.location_id = location.id) "
+                . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id)";
             try {
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute();
@@ -39,25 +44,31 @@
             }
         }
 
-        public function find_measurmentConfig($id)
+        public function find_measurementconfig($id)
         {
             $sql = "SELECT "
-                . "measurmentConfig.name AS \"measurmentConfig_name\", "
-                . "measurmentConfig.min, "
-                . "measurmentConfig.max, "
-                . "measurmentConfig.measuring_frequency_normal, "
-                . "measurmentConfig.measuring_frequency_warning, "
-                . "measurmentConfig.start_time, "
-                . "measurmentConfig.end_time, "
-                . "measurmentConfig.enabled, "
-                . "measurmentConfig.measuringUnit_id, "
+                . "measurementconfig.name AS \"measurementconfig_name\", "
+                . "measurementconfig.min, "
+                . "measurementconfig.max, "
+                . "measurementconfig.measuring_frequency_normal, "
+                . "measurementconfig.measuring_frequency_warning, "
+                . "measurementconfig.start_time, "
+                . "measurementconfig.end_time, "
+                . "measurementconfig.enabled, "
+                . "measurementconfig.measuringUnit_id, "
                 . "measuringUnit.name AS \"measuringUnit_name\", "
-                . "measurmentConfig.device_id, "
+                . "measurementconfig.device_id, "
                 . "device.name AS \"device_name\", "
-                . "device.mac AS \"device_mac\" "
-                . "FROM (( measurmentConfig "
-                . "INNER JOIN measuringUnit ON measurmentConfig.measuringUnit_id = measuringUnit.id) "
-                . "INNER JOIN device ON measurmentConfig.device_id = device.id) WHERE id = ?";
+                . "device.mac AS \"device_mac\", "
+                . "location.name AS \"location_name\", "
+                . "greenhouse.name AS \"greenhouse_name\", "
+                . "greenhouse.address AS \"greenhouse_address\" "
+                . "FROM (((( measurementconfig "
+                . "INNER JOIN measuringUnit ON measurementconfig.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN device ON measurementconfig.device_id = device.id) "
+                . "INNER JOIN location ON device.location_id = location.id) "
+                . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
+                . "WHERE id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
@@ -73,22 +84,28 @@
         public function find_measuringType($id)
         {
             $sql = "SELECT "
-                . "measurmentConfig.name AS \"measurmentConfig_name\", "
-                . "measurmentConfig.min, "
-                . "measurmentConfig.max, "
-                . "measurmentConfig.measuring_frequency_normal, "
-                . "measurmentConfig.measuring_frequency_warning, "
-                . "measurmentConfig.start_time, "
-                . "measurmentConfig.end_time, "
-                . "measurmentConfig.enabled, "
-                . "measurmentConfig.measuringUnit_id, "
+                . "measurementconfig.name AS \"measurementconfig_name\", "
+                . "measurementconfig.min, "
+                . "measurementconfig.max, "
+                . "measurementconfig.measuring_frequency_normal, "
+                . "measurementconfig.measuring_frequency_warning, "
+                . "measurementconfig.start_time, "
+                . "measurementconfig.end_time, "
+                . "measurementconfig.enabled, "
+                . "measurementconfig.measuringUnit_id, "
                 . "measuringUnit.name AS \"measuringUnit_name\", "
-                . "measurmentConfig.device_id, "
+                . "measurementconfig.device_id, "
                 . "device.name AS \"device_name\", "
-                . "device.mac AS \"device_mac\" "
-                . "FROM (( measurmentConfig "
-                . "INNER JOIN measuringUnit ON measurmentConfig.measuringUnit_id = measuringUnit.id) "
-                . "INNER JOIN device ON measurmentConfig.device_id = device.id) WHERE measuringUnit_id = ?";
+                . "device.mac AS \"device_mac\", "
+                . "location.name AS \"location_name\", "
+                . "greenhouse.name AS \"greenhouse_name\", "
+                . "greenhouse.address AS \"greenhouse_address\" "
+                . "FROM (((( measurementconfig "
+                . "INNER JOIN measuringUnit ON measurementconfig.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN device ON measurementconfig.device_id = device.id) "
+                . "INNER JOIN location ON device.location_id = location.id) "
+                . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id)"
+                . " WHERE measuringUnit_id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
@@ -104,22 +121,22 @@
         public function find_device($id)
         {
             $sql = "SELECT "
-                . "measurmentConfig.name AS \"measurmentConfig_name\", "
-                . "measurmentConfig.min, "
-                . "measurmentConfig.max, "
-                . "measurmentConfig.measuring_frequency_normal, "
-                . "measurmentConfig.measuring_frequency_warning, "
-                . "measurmentConfig.start_time, "
-                . "measurmentConfig.end_time, "
-                . "measurmentConfig.enabled, "
-                . "measurmentConfig.measuringUnit_id, "
+                . "measurementconfig.name AS \"measurementconfig_name\", "
+                . "measurementconfig.min, "
+                . "measurementconfig.max, "
+                . "measurementconfig.measuring_frequency_normal, "
+                . "measurementconfig.measuring_frequency_warning, "
+                . "measurementconfig.start_time, "
+                . "measurementconfig.end_time, "
+                . "measurementconfig.enabled, "
+                . "measurementconfig.measuringUnit_id, "
                 . "measuringUnit.name AS \"measuringUnit_name\", "
-                . "measurmentConfig.device_id, "
+                . "measurementconfig.device_id, "
                 . "device.name AS \"device_name\", "
                 . "device.mac AS \"device_mac\" "
-                . "FROM (( measurmentConfig "
-                . "INNER JOIN measuringUnit ON measurmentConfig.measuringUnit_id = measuringUnit.id) "
-                . "INNER JOIN device ON measurmentConfig.device_id = device.id) WHERE device_id = ?";
+                . "FROM (( measurementconfig "
+                . "INNER JOIN measuringUnit ON measurementconfig.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN device ON measurementconfig.device_id = device.id) WHERE device_id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
@@ -134,7 +151,7 @@
 
         public function insert( Array $input)
         {
-            $sql = "INSERT INTO measurementConfig "
+            $sql = "INSERT INTO measurementconfig "
                 . "(`name`, `min`, `max`, `measuring_frequency_normal`, "
                 . " `measuring_frequency_warning`, `start_time`, `end_time`, "
                 . " `enabled`, `measuringUnit_id`, `device_id`) "
@@ -161,7 +178,7 @@
 
         public function update($id, Array $input)
         {
-            $sql = "UPDATE measurementConfig SET "
+            $sql = "UPDATE measurementconfig SET "
                 . "name = ?, min = ?, max = ?, "
                 . "measuring_frequency_normal = ?, "
                 . "measuring_frequency_warning = ?, "
@@ -191,7 +208,7 @@
 
         public function delete($id)
         {
-            $sql = "DELETE FROM measurementConfig WHERE id = ?";
+            $sql = "DELETE FROM measurementconfig WHERE id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);

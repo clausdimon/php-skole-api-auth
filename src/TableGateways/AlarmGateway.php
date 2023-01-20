@@ -1,6 +1,9 @@
 <?php
     namespace Src\TableGateways;
 
+    use \DateTime;
+    use \DateTimeZone;
+
     class AlarmGateway
     {
         private $db = null;
@@ -18,12 +21,17 @@
                 . "alarm.isOn AS \"isOn\", "
                 . "alarm.device_id AS \"device_id\", "
                 . "device.name AS \"device_name\", "
+                . "location.name AS \"location_name\", "
+                . "greenhouse.name AS \"greenhouse_name\", "
+                . "greenhouse.address AS \"greenhouse_address\", "
                 . "alarm.value AS \"value\", "
                 . "alarm.measuringUnit_id AS \"measuringUnit_id\", "
                 . "measuringUnit.name AS \"measuringUnit_name\" "
-                . "FROM (( alarm "
+                . "FROM (((( alarm "
                 . "INNER JOIN device ON alarm.device_id = device.id) "
-                . "INNER JOIN measuringUnit ON alarm.measuringUnit_id = measuringUnit.id) ";
+                . "INNER JOIN measuringUnit ON alarm.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN location ON device.location_id = location.id) "
+                . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id)";
             try {
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute();
@@ -42,12 +50,17 @@
                 . "alarm.isOn AS \"isOn\", "
                 . "alarm.device_id AS \"device_id\", "
                 . "device.name AS \"device_name\", "
+                . "location.name AS \"location_name\", "
+                . "greenhouse.name AS \"greenhouse_name\", "
+                . "greenhouse.address AS \"greenhouse_address\", "
                 . "alarm.value AS \"value\", "
                 . "alarm.measuringUnit_id AS \"measuringUnit_id\", "
                 . "measuringUnit.name AS \"measuringUnit_name\" "
-                . "FROM (( alarm "
+                . "FROM (((( alarm "
                 . "INNER JOIN device ON alarm.device_id = device.id) "
                 . "INNER JOIN measuringUnit ON alarm.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN location ON device.location_id = location.id) "
+                . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
                 . "WHERE id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
@@ -68,12 +81,17 @@
                 . "alarm.isOn AS \"isOn\", "
                 . "alarm.device_id AS \"device_id\", "
                 . "device.name AS \"device_name\", "
+                . "location.name AS \"location_name\", "
+                . "greenhouse.name AS \"greenhouse_name\", "
+                . "greenhouse.address AS \"greenhouse_address\", "
                 . "alarm.value AS \"value\", "
                 . "alarm.measuringUnit_id AS \"measuringUnit_id\", "
                 . "measuringUnit.name AS \"measuringUnit_name\" "
-                . "FROM (( alarm "
+                . "FROM (((( alarm "
                 . "INNER JOIN device ON alarm.device_id = device.id) "
                 . "INNER JOIN measuringUnit ON alarm.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN location ON device.location_id = location.id) "
+                . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
                 . "WHERE measuringUnit_id = ?";
             $measuringUnit_id = htmlspecialchars(strip_tags($measuringUnit_id));
 
@@ -90,7 +108,7 @@
         public function insert(Array $input)
         {
             $statement = "INSERT INTO alarm (`date_time`, `isOn`, `device_id`, `value`, `measuringUnit_id`) VALUES(?,?,?,?,?)";
-            $date_time = htmlspecialchars(strip_tags($input['date_time']));
+            $date_time = $this->getDateAndTime();
             $isOn = htmlspecialchars(strip_tags($input['isOn']));
             $device_id = htmlspecialchars(strip_tags($input['device_id']));
             $value = htmlspecialchars(strip_tags($input['value']));
@@ -109,7 +127,7 @@
         public function update($id, Array $input)
         {
             $sql = "UPDATE alarm SET date_time = ?, isOn = ?, device_id = ?, value = ?, measuringUnit_id = ? WHERE id = ?";
-            $date_time = htmlspecialchars(strip_tags($input['date_time']));
+            $date_time = $this->getDateAndTime();
             $isOn = htmlspecialchars(strip_tags($input['isOn']));
             $device_id = htmlspecialchars(strip_tags($input['device_id']));
             $value = htmlspecialchars(strip_tags($input['value']));
@@ -138,6 +156,15 @@
             } catch (\mysqli_sql_exception $e) {
                 exit($e->getMessage());
             }
+        }
+
+        private function getDateAndTime()
+        {
+            $tz = 'Europe/Copenhagen';
+            $timestamp = time();
+            $dt = new DateTime('now', new DateTimeZone($tz));
+            $dt->setTimestamp($timestamp);
+            return $dt->format('Y.m.d H:i:s');
         }
 
 
