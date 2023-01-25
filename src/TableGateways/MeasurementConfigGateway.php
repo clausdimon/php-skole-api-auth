@@ -68,7 +68,7 @@
                 . "INNER JOIN device ON measurementconfig.device_id = device.id) "
                 . "INNER JOIN location ON device.location_id = location.id) "
                 . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
-                . "WHERE id = ?";
+                . "WHERE measurementconfig.id = ? LIMIT 1";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
@@ -105,7 +105,7 @@
                 . "INNER JOIN device ON measurementconfig.device_id = device.id) "
                 . "INNER JOIN location ON device.location_id = location.id) "
                 . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id)"
-                . " WHERE measuringUnit_id = ?";
+                . " WHERE measurementconfig.measuringUnit_id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
@@ -136,14 +136,46 @@
                 . "device.mac AS \"device_mac\" "
                 . "FROM (( measurementconfig "
                 . "INNER JOIN measuringUnit ON measurementconfig.measuringUnit_id = measuringUnit.id) "
-                . "INNER JOIN device ON measurementconfig.device_id = device.id) WHERE device_id = ?";
+                . "INNER JOIN device ON measurementconfig.device_id = device.id) WHERE measurementconfig.device_id = ? LIMIT 2";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
                 $stmt->bind_param('i', $id);
                 $stmt->execute();
                 $result = $stmt->get_result();
-                return $result->fetch_assoc();
+                return $result->fetch_all(MYSQLI_ASSOC);
+            } catch (\mysqli_sql_exception $e) {
+                exit($e->getMessage());
+            }
+        }
+
+        public function find_config_by_mac($mac)
+        {
+            $sql = "SELECT "
+                . "measurementconfig.name AS \"measurementconfig_name\", "
+                . "measurementconfig.min, "
+                . "measurementconfig.max, "
+                . "measurementconfig.measuring_frequency_normal, "
+                . "measurementconfig.measuring_frequency_warning, "
+                . "measurementconfig.start_time, "
+                . "measurementconfig.end_time, "
+                . "measurementconfig.enabled, "
+                . "measurementconfig.measuringUnit_id, "
+                . "measuringUnit.name AS \"measuringUnit_name\", "
+                . "measurementconfig.device_id, "
+                . "device.name AS \"device_name\", "
+                . "device.mac AS \"device_mac\" "
+                . "FROM (( measurementconfig "
+                . "INNER JOIN measuringUnit ON measurementconfig.measuringUnit_id = measuringUnit.id) "
+                . "INNER JOIN device ON measurementconfig.device_id = device.id) WHERE device.mac = ? LIMIT 2";
+
+            $mac = htmlspecialchars(strip_tags($mac));
+            try {
+                $stmt = $this->db->prepare($sql);
+                $stmt->bind_param('s', $mac);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC);
             } catch (\mysqli_sql_exception $e) {
                 exit($e->getMessage());
             }
@@ -184,7 +216,7 @@
                 . "measuring_frequency_warning = ?, "
                 . "start_time = ?, end_time = ?, "
                 . "enabled = ?, measuringUnit_id = ?, "
-                . "device_id = ? WHERE id = ?";
+                . "device_id = ? WHERE measurementconfig.id = ?";
             $name = htmlspecialchars(strip_tags($input['name']));
             $min = htmlspecialchars(strip_tags($input['min']));
             $max = htmlspecialchars(strip_tags($input['max']));
@@ -208,7 +240,7 @@
 
         public function delete($id)
         {
-            $sql = "DELETE FROM measurementconfig WHERE id = ?";
+            $sql = "DELETE FROM measurementconfig WHERE measurementconfig.id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);

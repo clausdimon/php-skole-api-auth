@@ -100,7 +100,7 @@
 
         public function update($id, Array $input)
         {
-            $sql = "UPDATE device SET name = ?, location_id = ?, mac = ? WHERE id = ?";
+            $sql = "UPDATE device SET name = ?, location_id = ?, mac = ? WHERE device.id = ?";
             $name = htmlspecialchars(strip_tags($input['name']));
             $location_id = htmlspecialchars(strip_tags($input['location_id']));
             $mac = htmlspecialchars(strip_tags($input['mac']));
@@ -117,7 +117,7 @@
 
         public function delete($id)
         {
-            $sql = "DELETE FROM device WHERE id = ?";
+            $sql = "DELETE FROM device WHERE device.id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);

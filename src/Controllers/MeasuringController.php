@@ -135,7 +135,7 @@
 
         private function notFoundResponse()
         {
-            $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
+            $response['status_code_header'] = 'HTTP/1.1 404 File Missing';
             $response['body'] = null;
             return $response;
         }
@@ -149,7 +149,7 @@
             )
             {
                 return false;
-            } else
+            }else
             {
                 return true;
             }
@@ -157,7 +157,7 @@
 
         private function unprocessableEntityResponse()
         {
-            $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
+            $response['status_code_header'] = 'HTTP/1.1 422 Missing Parameters';
             $response['body'] = json_encode([
                 'error' => 'Invalid input'
             ]);

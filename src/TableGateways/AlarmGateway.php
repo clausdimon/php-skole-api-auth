@@ -61,7 +61,7 @@
                 . "INNER JOIN measuringUnit ON alarm.measuringUnit_id = measuringUnit.id) "
                 . "INNER JOIN location ON device.location_id = location.id) "
                 . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
-                . "WHERE id = ?";
+                . "WHERE alarm.id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
@@ -92,7 +92,7 @@
                 . "INNER JOIN measuringUnit ON alarm.measuringUnit_id = measuringUnit.id) "
                 . "INNER JOIN location ON device.location_id = location.id) "
                 . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
-                . "WHERE measuringUnit_id = ?";
+                . "WHERE alarm.measuringUnit_id = ?";
             $measuringUnit_id = htmlspecialchars(strip_tags($measuringUnit_id));
 
             try {
@@ -126,7 +126,7 @@
         }
         public function update($id, Array $input)
         {
-            $sql = "UPDATE alarm SET date_time = ?, isOn = ?, device_id = ?, value = ?, measuringUnit_id = ? WHERE id = ?";
+            $sql = "UPDATE alarm SET date_time = ?, isOn = ?, device_id = ?, value = ?, measuringUnit_id = ? WHERE alarm.id = ?";
             $date_time = $this->getDateAndTime();
             $isOn = htmlspecialchars(strip_tags($input['isOn']));
             $device_id = htmlspecialchars(strip_tags($input['device_id']));
@@ -145,7 +145,7 @@
         }
         public function delete($id)
         {
-            $sql = "DELETE FROM alarm WHERE id = ?";
+            $sql = "DELETE FROM alarm WHERE alarm.id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);

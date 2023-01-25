@@ -10,15 +10,17 @@
         private $measurementconfig_id;
         private $measuringUnit_id;
         private $device_id;
+        private $mac;
         private $measurementconfigGateway;
 
-        public function __construct($db, $requestMethod, $measurementconfig_id, $measuringUnit_id, $device_id)
+        public function __construct($db, $requestMethod, $measurementconfig_id, $measuringUnit_id, $device_id, $mac)
         {
             $this->db = $db;
             $this->requestMethod = $requestMethod;
             $this->measurementconfig_id = $measurementconfig_id;
             $this->measuringUnit_id = $measuringUnit_id;
             $this->device_id = $device_id;
+            $this->mac = $mac;
             $this->measurementconfigGateway = new MeasurementConfigGateway($db);
         }
 
@@ -36,6 +38,9 @@
                     } elseif ( $this->device_id)
                     {
                         $response = $this->getDeviceConfig($this->device_id);
+                    } elseif ($this->mac)
+                    {
+                     $response = $this->getConfigWithMac($this->mac);
                     } else
                     {
                         $response = $this->getAllConfig();
@@ -100,6 +105,18 @@
         private function getDeviceConfig($id)
         {
             $result = $this->measurementconfigGateway->find_device($id);
+            if (! $result)
+            {
+                return $this->notFoundResponse();
+            }
+            $response['status_code_header'] = 'HTTP/1.1 200 OK';
+            $response['body'] = json_encode($result);
+            return $response;
+        }
+
+        private function getConfigWithMac($mac)
+        {
+            $result = $this->measurementconfigGateway->find_config_by_mac($mac);
             if (! $result)
             {
                 return $this->notFoundResponse();

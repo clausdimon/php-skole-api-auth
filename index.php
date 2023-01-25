@@ -1,5 +1,5 @@
 <?php
-require __DIR__."/../bootstrap.php";
+require __DIR__ . "/bootstrap.php";
 
 use Src\Controllers\MeasuringController;
 use Src\Controllers\AlarmController;
@@ -32,12 +32,12 @@ switch ($uri[1])
         {
             $measuringUnit_id = $uri[2];
         }
-
-        if (! authenticate())
-        {
-            header("HTTP/1.1 401 Unauthorized");
-            exit('Unauthorized');
-        }
+//
+//        if (! authenticate())
+//        {
+//            header("HTTP/1.1 401 Unauthorized");
+//            exit('Unauthorized');
+//        }
 
         $requestMethod = $_SERVER["REQUEST_METHOD"];
 
@@ -56,11 +56,11 @@ switch ($uri[1])
             $measuringUnit_id = $uri[2];
         }
 
-        if (! authenticate())
-        {
-            header('HTTP/1.1 401 Unauthorized');
-            exit('Unauthorized');
-        }
+//        if (! authenticate())
+//        {
+//            header('HTTP/1.1 401 Unauthorized');
+//            exit('Unauthorized');
+//        }
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
         $measuringController = new MeasuringController($dbConnection, $requestMethod, $measurment_id, $measuringUnit_id);
@@ -78,11 +78,11 @@ switch ($uri[1])
             $location_id = $uri[2];
         }
 
-        if (! authenticate())
-        {
-            header('HTTP/1.1 401 Unauthorized');
-            exit('Unauthorized');
-        }
+//        if (! authenticate())
+//        {
+//            header('HTTP/1.1 401 Unauthorized');
+//            exit('Unauthorized');
+//        }
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
         $deviceController = new DeviceController($dbConnection, $requestMethod, $device_id, $location_id);
@@ -92,6 +92,7 @@ switch ($uri[1])
         $measurementconfig_id = null;
         $measuringUnit_id = null;
         $device_id = null;
+        $mac = null;
 
         if ($uri[3] === 'config')
         {
@@ -102,16 +103,19 @@ switch ($uri[1])
         } elseif ($uri[3] === 'device')
         {
             $device_id = $uri[2];
+        } elseif ($uri[3] === 'mac')
+        {
+            $mac = $uri[2];
         }
 
-        if (! authenticate())
-        {
-            header('HTTP/1.1 401 Unauthorized');
-            exit('Unauthorized');
-        }
+//        if (! authenticate())
+//        {
+//            header('HTTP/1.1 401 Unauthorized');
+//            exit('Unauthorized');
+//        }
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
-        $measurementconfigController = new MeasurmentConfigController($dbConnection, $requestMethod, $measurementconfig_id, $measuringUnit_id, $device_id);
+        $measurementconfigController = new MeasurmentConfigController($dbConnection, $requestMethod, $measurementconfig_id, $measuringUnit_id, $device_id, $mac);
         $measurementconfigController->processRequest();
         break;
     default:

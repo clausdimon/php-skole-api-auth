@@ -1,6 +1,8 @@
 <?php
     namespace Src\TableGateways;
 
+    use \DateTime;
+    use \DateTimeZone;
     class MeasuringGateway
     {
         private $db = null;
@@ -57,7 +59,7 @@
                 . "INNER JOIN device ON measurement.device_id = device.id) "
                 . "INNER JOIN location ON device.location_id = location.id) "
                 . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
-                . "WHERE id = ?";
+                . "WHERE measurement.id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
@@ -88,7 +90,7 @@
                 . "INNER JOIN device ON measurement.device_id = device.id) "
                 . "INNER JOIN location ON device.location_id = location.id) "
                 . "INNER JOIN greenhouse ON location.greenhouse_id = greenhouse.id) "
-                . "WHERE measuringUnit_id = ?";
+                . "WHERE measurement.measuringUnit_id = ?";
             $measuringUnit_id = htmlspecialchars(strip_tags($measuringUnit_id));
 
             try {
@@ -123,7 +125,7 @@
 
         public function update($id, Array $input)
         {
-            $sql = "UPDATE measurement SET value = ?, measuringUnit_id = ?, timestamp = ?, device_id = ? WHERE id = ?";
+            $sql = "UPDATE measurement SET value = ?, measuringUnit_id = ?, timestamp = ?, device_id = ? WHERE measurement.id = ?";
             $value = htmlspecialchars(strip_tags($input['value']));
             $measuringUnit_id = htmlspecialchars(strip_tags($input['measuringUnit_id']));
             $timestamp = $this->getDateAndTime();
@@ -142,7 +144,7 @@
 
         public function delete($id)
         {
-            $sql = "DELETE FROM measurement WHERE id = ?";
+            $sql = "DELETE FROM measurement WHERE measurement.id = ?";
             $id = htmlspecialchars(strip_tags($id));
             try {
                 $stmt = $this->db->prepare($sql);
